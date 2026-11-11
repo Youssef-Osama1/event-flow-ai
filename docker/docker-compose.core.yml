@@ -1,0 +1,99 @@
+x-app: &app
+  env_file:
+    - path: ../.env
+      required: false
+    - path: .env
+      required: false
+  environment:
+    DATABASE_HOST: db
+    DATABASE_PORT: 5432
+    REDIS_URL: redis://redis:6379/0
+  restart: unless-stopped
+  networks: [default]
+
+services:
+  api:
+    <<: *app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    command: ["uvicorn", "eventflow.api.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload", "--reload-dir", "/workspace/app"]
+    volumes:
+      - ../app:/workspace/app
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  celery_worker:
+    <<: *app
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.celery
+    volumes:
+      - ../app:/workspace/app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  migrate:
+    <<: *app
+    restart: "no"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    working_dir: /workspace/app/eventflow
+    command: ["alembic", "upgrade", "head"]
+    volumes:
+      - ../app:/workspace/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [default]
+
+  db:
+    image: supabase/postgres:15.8.1.085
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME:-postgres}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXPIRY:-3600}
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    ports:
+      - "127.0.0.1:${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [default]
+
+volumes:
+  db_data:
+  redis_data:

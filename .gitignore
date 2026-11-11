@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.env
+docker/.env
+*.egg-info/
+dist/
+build/
+evals/results/
+.DS_Store
+CLAUDE.md
+.claude/
+*.tmp

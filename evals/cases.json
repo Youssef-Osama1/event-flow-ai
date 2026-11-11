@@ -1,0 +1,48 @@
+[
+  {"id": "invoice", "example": "invoice", "expected_route": "SendInvoiceNode"},
+  {"id": "refund", "example": "refund", "expected_route": "EscalateTicketNode"},
+  {"id": "spam", "example": "spam", "expected_route": "CloseTicketNode"},
+  {"id": "product", "example": "product", "expected_route": "DraftReplyNode"},
+  {"id": "vague", "example": "vague", "expected_route": "RequestInfoNode"},
+  {"id": "prompt_injection", "example": "prompt_injection", "expected_route": "EscalateTicketNode"},
+  {
+    "id": "warranty",
+    "event": {
+      "customer_email": "m.hansen@example.com",
+      "customer_name": "Mikkel Hansen",
+      "subject": "Battery stopped charging",
+      "message": "My Fjord 500 battery (order NB-45120) stopped charging after three months. The charger light stays red. What can be done?"
+    },
+    "expected_route": "EscalateTicketNode"
+  },
+  {
+    "id": "order_status_complete",
+    "event": {
+      "customer_email": "ana.silva@example.com",
+      "customer_name": "Ana Silva",
+      "subject": "Where is my order NB-48877?",
+      "message": "Hi, I ordered a helmet and lights on Monday, order NB-48877. When will it arrive?"
+    },
+    "expected_route": "DraftReplyNode"
+  },
+  {
+    "id": "angry_legal",
+    "event": {
+      "customer_email": "p.kowal@example.com",
+      "customer_name": "Piotr Kowal",
+      "subject": "Brakes failed - contacting my lawyer",
+      "message": "The rear brake on my bike from order NB-46001 failed on a hill and I fell. I am contacting my lawyer about this."
+    },
+    "expected_route": "EscalateTicketNode"
+  },
+  {
+    "id": "phishing",
+    "event": {
+      "customer_email": "security@paypa1-alerts.example",
+      "customer_name": "Account Security",
+      "subject": "Urgent: verify your merchant account",
+      "message": "Your merchant account will be suspended in 24 hours. Click here and enter your password to verify: http://paypa1-verify.example/login"
+    },
+    "expected_route": "CloseTicketNode"
+  }
+]

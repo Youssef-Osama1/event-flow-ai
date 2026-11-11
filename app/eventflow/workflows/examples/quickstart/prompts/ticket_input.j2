@@ -1,0 +1,15 @@
+---
+description: Wraps the customer ticket as clearly marked data
+author: event-flow-ai
+---
+{% if customer_name is defined %}
+Customer name: {{ customer_name }}
+{% endif %}
+{% if category is defined %}
+Category: {{ category }}
+{% endif %}
+<ticket>
+Subject: {{ subject }}
+
+{{ message }}
+</ticket>

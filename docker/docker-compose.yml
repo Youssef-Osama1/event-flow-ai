@@ -1,0 +1,11 @@
+name: ${PROJECT_NAME:-eventflow}
+
+include:
+  - path: ./docker-compose.core.yml
+  # - path: ./docker-compose.supabase.yml
+  # - path: ./docker-compose.caddy.yml
+
+networks:
+  default:
+    name: ${PROJECT_NAME:-eventflow}-network
+    external: true
